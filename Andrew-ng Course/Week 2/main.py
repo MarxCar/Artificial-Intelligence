@@ -57,4 +57,3 @@ theta = gradient_descent_runner(theta, x,y,alpha,iterations)
 print("Final Weights: " + str(theta))
 print("Final Error: %f" %(mean_squared_error(theta,x,y)))
 
-
