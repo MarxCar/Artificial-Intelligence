@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import math
 from scipy.optimize import minimize
-from sklearn import linear_model
+from sklearn.preprocessing import PolynomialFeatures
 data = np.loadtxt("ex2data1.txt", delimiter=",")
 
 
@@ -51,6 +51,10 @@ def gradientDescent(t,x,y):
 
 	return(gradient.flatten())
 
+def predict(thetas, xs):
+	return xs.dot(thetas)
+
+
 
 theta =  np.array([[0],[0],[0]])
 print("Cost of Model Before Hand: " + str(costFunction(theta,X,y)[0]))
@@ -68,8 +72,7 @@ print("Cost of Model After SLSQP: " + str(res.fun))
 res2 = minimize(costFunction, theta, args=(X,y), method=None, jac=gradientDescent, options={'maxiter':400})
 
 print("Cost of Model After Gradient Descent:  " + str(res2.fun))
+print("Prediction Based off of Exam Score: %.2f " %  sigmoid(predict(res2.x,np.array([[1, 45, 85]]))))
 
 
-
-
-
+plt.show()

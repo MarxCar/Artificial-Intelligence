@@ -3,7 +3,7 @@ import scipy.io as sio
 import matplotlib.pyplot as plt
 import matplotlib.image as mping
 import math
-
+from scipy.optimize import minimize
 
 dataset = sio.loadmat("ex3data1.mat")
 X = np.c_[np.ones(dataset['X'].shape[0]),dataset['X']]
@@ -28,9 +28,22 @@ def cost_function(x, y, theta, regular):
     return regularized[0]
 
 
+
+
 def gradient_descent(theta,x,y, regular):
     hypo = sigmoid(x.dot(theta))
     m = len(y)
     return (((1.0/m) * (x.T.dot(hypo - y))) + (regular/m)*theta).flatten()
+
+
+def one_versus_all(x,y,n, regular):
+    theta = np.zeros((x.shape[1], 1))
+    ctheta = np.zeros((n, x.shape[1]))
+
+    for z in np.arange(1,n+1):
+        fun = minimize(cost_function, theta, args=(x,y == z,regular), method=None, jac=lrgradientReg)
+        ctheta[z-1] = fun.x
+    return ctheta
+
 
 
