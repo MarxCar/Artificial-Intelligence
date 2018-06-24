@@ -1,8 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split, cross_val_score
-from sklearn.model_selection import StratifiedShuffleSplit
+from sklearn.model_selection import train_test_split, cross_val_score, StratifiedShuffleSplit
 from sklearn.preprocessing import  LabelBinarizer, StandardScaler, CategoricalEncoder
 from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline, FeatureUnion
@@ -19,18 +18,6 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
 		return self
 	def transform(self, X):
 		return X[self.attribute_names].values
-#returns label binarizer back to pipeline friendly state
-class LabelBinarizerPipelineFriendly(LabelBinarizer):
-    def fit(self, X, y=None):
-        """this would allow us to fit the model based on the X input."""
-        super(LabelBinarizerPipelineFriendly, self).fit(X)
-    def transform(self, X, y=None):
-        return super(LabelBinarizerPipelineFriendly, self).transform(X)
-
-    def fit_transform(self, X, y=None):
-        return super(LabelBinarizerPipelineFriendly, self).fit(X).transform(X)
-
-
 
 
 
@@ -45,6 +32,7 @@ dataframe["income_cat"] = np.ceil(dataframe["median_income"] / 1.5)
 dataframe["income_cat"].where(dataframe["income_cat"] < 5, 5.0, inplace=True)
 
 
+#splits dataset with training and test sections with strafied sampling
 split = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42) #answer to life the universe and everything
 for train_index, test_index in split.split(dataframe, dataframe["income_cat"]):
 	
@@ -58,8 +46,7 @@ housing = strat_train_set.copy()
 housing.plot(kind="scatter", x="longitude",y="latitude", alpha=0.1, s=housing['population']/100, label="population", c="median_house_value", cmap=plt.get_cmap("jet"), colorbar=True)
 plt.legend()
 
-
-#plt.show()
+plt.show()
 
 housing = strat_train_set.drop("median_house_value", axis=1)
 housing_labels = strat_train_set["median_house_value"].copy()
@@ -103,3 +90,13 @@ h = np.sqrt(-scores)
 print("Forest Mean and STD after Cross Reg:")
 print(h.mean())
 print(h.std())
+
+
+X_test = strat_test_set.drop("median_house_value", axis=1)
+y_test = strat_test_set["median_house_value"].copy()
+
+X_test_prepared = full_pipeline.transform(X_test)
+predictions = forest_reg.predict(X_test_prepared)
+
+test_mse = mean_squared_error(y_test, predictions)
+print("RMSE of Random Forest Model on Test Set: " + str(np.sqrt(test_mse)))
